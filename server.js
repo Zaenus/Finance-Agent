@@ -21,9 +21,9 @@ app.use(express.static('public'));
 // Initialize clients
 const polygon = restClient(process.env.POLYGON_API_KEY);
 
-const xaiClient = new OpenAI({
-  apiKey: process.env.XAI_API_KEY,
-  baseURL: 'https://api.x.ai/v1',
+const geminiClient = new OpenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
 });
 
 // Helper: return a YYYY-MM-DD date string offset by daysAgo from today
@@ -94,7 +94,7 @@ app.post('/analyze', async (req, res) => {
   try {
     for (const symbol of stocks) {
       const upperSymbol = symbol.toUpperCase().trim();
-      const aggs = await polygon.aggregates(upperSymbol, 1, 'day', oneMonthAgo, today);
+      const aggs = await polygon.stocks.aggregates(upperSymbol, 1, 'day', oneMonthAgo, today);
 
       stockMetrics[upperSymbol] =
         aggs.results && aggs.results.length > 0 ? computeStockMetrics(aggs.results) : null;
@@ -103,8 +103,8 @@ app.post('/analyze', async (req, res) => {
     const systemPrompt = buildSystemPrompt(profile);
     const userPrompt = buildUserPrompt(stockMetrics, profile);
 
-    const aiResponse = await xaiClient.chat.completions.create({
-      model: process.env.XAI_MODEL || 'grok-3',
+    const aiResponse = await geminiClient.chat.completions.create({
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',  // <-- change here as needed
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
