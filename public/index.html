@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Agent — AI Stock Advisor</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --accent:    #58a6ff;
+      --accent-2:  #3fb950;
+      --warn:      #f78166;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --radius:    10px;
+      --shadow:    0 4px 24px rgba(0,0,0,.45);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 0 1rem 3rem;
+    }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .page-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ───────────────────────────────────────── */
+    header {
+      padding: 2.5rem 0 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #58a6ff 0%, #3fb950 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    header h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 2px;
+    }
+
+    /* ── Cards ────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Form elements ────────────────────────────────── */
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.93rem;
+      padding: 0.55rem 0.75rem;
+      outline: none;
+      transition: border-color 0.15s;
+      appearance: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    /* ── Stock ticker row ─────────────────────────────── */
+    .ticker-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .ticker-row input { flex: 1; text-transform: uppercase; }
+
+    .btn-add {
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.93rem;
+      font-weight: 600;
+      padding: 0 1.1rem;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .btn-add:hover { opacity: 0.85; }
+
+    /* ── Chips ────────────────────────────────────────── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+      min-height: 2rem;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(88,166,255,.12);
+      border: 1px solid rgba(88,166,255,.35);
+      border-radius: 20px;
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.2rem 0.65rem;
+    }
+    .chip button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 0.95rem;
+      line-height: 1;
+      padding: 0;
+      opacity: 0.7;
+    }
+    .chip button:hover { opacity: 1; }
+
+    .chip-hint {
+      color: var(--muted);
+      font-size: 0.8rem;
+      align-self: center;
+    }
+
+    /* ── Profile grid ─────────────────────────────────── */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 540px) {
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Analyze button ───────────────────────────────── */
+    .btn-analyze {
+      width: 100%;
+      background: linear-gradient(135deg, #388bfd 0%, #2ea043 100%);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      padding: 0.85rem 1.5rem;
+      transition: opacity 0.15s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-analyze:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-analyze:active:not(:disabled) { transform: translateY(0); }
+    .btn-analyze:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── Spinner ──────────────────────────────────────── */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 0.45rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error banner ─────────────────────────────────── */
+    .error-banner {
+      background: rgba(247,129,102,.12);
+      border: 1px solid rgba(247,129,102,.4);
+      border-radius: var(--radius);
+      color: var(--warn);
+      display: none;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      padding: 0.85rem 1rem;
+    }
+    .error-banner.visible { display: block; }
+
+    /* ── Results ──────────────────────────────────────── */
+    #results { display: none; }
+    #results.visible { display: block; }
+
+    .timestamp {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 1.25rem;
+      text-align: right;
+    }
+
+    /* AI advice box */
+    .advice-box {
+      background: rgba(63,185,80,.07);
+      border: 1px solid rgba(63,185,80,.3);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 1.25rem;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 0.94rem;
+    }
+
+    /* Stock metric cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.3rem;
+    }
+    .metric-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+    .metric-card-ticker {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .badge {
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.18rem 0.6rem;
+      text-transform: uppercase;
+    }
+    .badge-bullish  { background: rgba(63,185,80,.18);  color: #3fb950; border: 1px solid rgba(63,185,80,.4); }
+    .badge-bearish  { background: rgba(247,129,102,.18); color: #f78166; border: 1px solid rgba(247,129,102,.4); }
+    .badge-sideways { background: rgba(139,148,158,.18); color: #8b949e; border: 1px solid rgba(139,148,158,.4); }
+
+    .metric-rows { display: flex; flex-direction: column; gap: 0.45rem; }
+    .metric-row  { display: flex; justify-content: space-between; font-size: 0.84rem; }
+    .metric-label { color: var(--muted); }
+    .metric-value { font-weight: 600; }
+    .pos { color: #3fb950; }
+    .neg { color: #f78166; }
+
+    .metric-period {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 0.75rem;
+      padding-top: 0.6rem;
+    }
+
+    .no-data {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.88rem;
+      padding: 0.5rem 0;
+    }
+
+    /* Profile summary pills */
+    .profile-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+    }
+    .profile-pill {
+      background: rgba(88,166,255,.1);
+      border: 1px solid rgba(88,166,255,.25);
+      border-radius: 20px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      padding: 0.15rem 0.65rem;
+    }
+    .profile-pill span { color: var(--text); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ── Header ─────────────────────────────────────── -->
+  <header>
+    <div class="logo">📈</div>
+    <div>
+      <h1>Finance Agent</h1>
+      <p>AI-powered stock analysis &amp; personalized investment advice</p>
+    </div>
+  </header>
+
+  <!-- ── Stock Tickers ───────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Stock Tickers</div>
+    <div class="ticker-row">
+      <input
+        id="tickerInput"
+        type="text"
+        placeholder="e.g. AAPL, TSLA, MSFT"
+        maxlength="5"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="btn-add" id="addTickerBtn">Add</button>
+    </div>
+    <div class="chips" id="chips">
+      <span class="chip-hint" id="chipsHint">No stocks added yet — add up to 10 tickers above.</span>
+    </div>
+  </div>
+
+  <!-- ── Investment Profile ──────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Investment Profile</div>
+    <div class="profile-grid">
+
+      <div>
+        <label for="riskTolerance">Risk Tolerance</label>
+        <select id="riskTolerance">
+          <option value="low">Low — Capital preservation</option>
+          <option value="medium" selected>Medium — Balanced</option>
+          <option value="high">High — Aggressive growth</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="investmentHorizon">Investment Horizon</label>
+        <select id="investmentHorizon">
+          <option value="short">Short-term (&lt; 1 year)</option>
+          <option value="medium" selected>Medium-term (1–5 years)</option>
+          <option value="long">Long-term (5+ years)</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="goals">Investment Goals</label>
+        <select id="goals">
+          <option value="growth" selected>Growth</option>
+          <option value="income">Income</option>
+          <option value="preservation">Capital Preservation</option>
+          <option value="balanced">Balanced</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="experience">Experience Level</label>
+        <select id="experience">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate" selected>Intermediate</option>
+          <option value="expert">Expert</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="investmentAmount">Available Capital (USD, optional)</label>
+        <input
+          id="investmentAmount"
+          type="number"
+          placeholder="e.g. 10000"
+          min="1"
+          step="1"
+        />
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Analyze button ─────────────────────────────── -->
+  <button class="btn-analyze" id="analyzeBtn">Analyze Stocks</button>
+
+  <!-- ── Error banner ───────────────────────────────── -->
+  <div class="error-banner" id="errorBanner"></div>
+
+  <!-- ── Results ────────────────────────────────────── -->
+  <div id="results">
+
+    <div class="timestamp" id="analysisTime"></div>
+
+    <div class="card">
+      <div class="card-title">AI Investment Advice</div>
+      <div class="advice-box" id="adviceText"></div>
+      <div class="profile-summary" id="profileSummary"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Stock Metrics</div>
+      <div class="metrics-grid" id="metricsGrid"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  /* ─── State ───────────────────────────────────────── */
+  const tickers = new Set();
+
+  /* ─── DOM refs ────────────────────────────────────── */
+  const tickerInput  = document.getElementById('tickerInput');
+  const addTickerBtn = document.getElementById('addTickerBtn');
+  const chipsEl      = document.getElementById('chips');
+  const chipsHint    = document.getElementById('chipsHint');
+  const analyzeBtn   = document.getElementById('analyzeBtn');
+  const errorBanner  = document.getElementById('errorBanner');
+  const resultsEl    = document.getElementById('results');
+  const adviceText   = document.getElementById('adviceText');
+  const metricsGrid  = document.getElementById('metricsGrid');
+  const profileSummary = document.getElementById('profileSummary');
+  const analysisTime = document.getElementById('analysisTime');
+
+  /* ─── Ticker management ───────────────────────────── */
+  function addTicker() {
+    const raw = tickerInput.value.trim().toUpperCase();
+    if (!raw) return;
+
+    // Basic validation: 1-5 uppercase letters
+    if (!/^[A-Z]{1,5}$/.test(raw)) {
+      showError('Ticker symbols should be 1–5 letters (e.g. AAPL, TSLA).');
+      return;
+    }
+    if (tickers.size >= 10) {
+      showError('Maximum of 10 stock tickers allowed per analysis.');
+      return;
+    }
+    if (tickers.has(raw)) {
+      showError(`"${raw}" is already in your list.`);
+      return;
+    }
+
+    tickers.add(raw);
+    tickerInput.value = '';
+    hideError();
+    renderChips();
+  }
+
+  function removeTicker(symbol) {
+    tickers.delete(symbol);
+    renderChips();
+  }
+
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    if (tickers.size === 0) {
+      chipsEl.appendChild(chipsHint);
+      return;
+    }
+    tickers.forEach(sym => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.innerHTML = `${sym} <button aria-label="Remove ${sym}" data-sym="${sym}">✕</button>`;
+      chip.querySelector('button').addEventListener('click', () => removeTicker(sym));
+      chipsEl.appendChild(chip);
+    });
+  }
+
+  /* ─── Ticker input events ─────────────────────────── */
+  addTickerBtn.addEventListener('click', addTicker);
+  tickerInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addTicker(); }
+  });
+
+  // Auto-add if user types a comma or space
+  tickerInput.addEventListener('input', () => {
+    const val = tickerInput.value;
+    if (val.endsWith(',') || val.endsWith(' ')) {
+      tickerInput.value = val.slice(0, -1);
+      addTicker();
+    }
+  });
+
+  /* ─── Error helpers ───────────────────────────────── */
+  function showError(msg) {
+    errorBanner.textContent = msg;
+    errorBanner.classList.add('visible');
+  }
+  function hideError() {
+    errorBanner.classList.remove('visible');
+    errorBanner.textContent = '';
+  }
+
+  /* ─── Loading state ───────────────────────────────── */
+  function setLoading(loading) {
+    analyzeBtn.disabled = loading;
+    analyzeBtn.innerHTML = loading
+      ? '<span class="spinner"></span>Analyzing…'
+      : 'Analyze Stocks';
+  }
+
+  /* ─── Analyze ─────────────────────────────────────── */
+  analyzeBtn.addEventListener('click', async () => {
+    hideError();
+
+    if (tickers.size === 0) {
+      showError('Please add at least one stock ticker before analyzing.');
+      return;
+    }
+
+    const amountRaw = document.getElementById('investmentAmount').value.trim();
+    const amount = amountRaw !== '' ? parseFloat(amountRaw) : undefined;
+
+    if (amount !== undefined && (isNaN(amount) || amount <= 0)) {
+      showError('Available capital must be a positive number.');
+      return;
+    }
+
+    const payload = {
+      stocks: Array.from(tickers),
+      profile: {
+        riskTolerance:      document.getElementById('riskTolerance').value,
+        investmentHorizon:  document.getElementById('investmentHorizon').value,
+        goals:              document.getElementById('goals').value,
+        experience:         document.getElementById('experience').value,
+        ...(amount !== undefined && { investmentAmount: amount }),
+      },
+    };
+
+    setLoading(true);
+    resultsEl.classList.remove('visible');
+
+    try {
+      const resp = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        showError(data.error || `Request failed (HTTP ${resp.status}).`);
+        return;
+      }
+
+      renderResults(data);
+    } catch (err) {
+      showError('Could not reach the server. Please ensure the Finance Agent is running.');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  /* ─── Render results ──────────────────────────────── */
+  function renderResults(data) {
+    // Timestamp
+    analysisTime.textContent = `Analysis completed: ${new Date(data.analyzedAt).toLocaleString()}`;
+
+    // AI advice
+    adviceText.textContent = data.advice;
+
+    // Profile summary pills
+    const p = data.profile;
+    const pills = [
+      ['Risk', p.riskTolerance],
+      ['Horizon', p.investmentHorizon],
+      ['Goals', p.goals],
+      ['Experience', p.experience],
+    ];
+    if (p.investmentAmount !== undefined) pills.push(['Capital', `$${p.investmentAmount.toLocaleString()}`]);
+
+    profileSummary.innerHTML = pills
+      .map(([k, v]) => `<span class="profile-pill">${k}: <span>${capitalize(v)}</span></span>`)
+      .join('');
+
+    // Stock metrics cards
+    metricsGrid.innerHTML = '';
+    const summary = data.stockSummary || {};
+    const symbols = Object.keys(summary);
+
+    if (symbols.length === 0) {
+      metricsGrid.innerHTML = '<p class="no-data">No stock data available.</p>';
+    } else {
+      symbols.forEach(sym => {
+        metricsGrid.appendChild(buildMetricCard(sym, summary[sym]));
+      });
+    }
+
+    resultsEl.classList.add('visible');
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function buildMetricCard(symbol, m) {
+    const card = document.createElement('div');
+    card.className = 'metric-card';
+
+    if (!m) {
+      card.innerHTML = `
+        <div class="metric-card-header">
+          <span class="metric-card-ticker">${symbol}</span>
+        </div>
+        <p class="no-data">No market data available for this ticker.</p>`;
+      return card;
+    }
+
+    const changeCls   = m.priceChangePercent >= 0 ? 'pos' : 'neg';
+    const changeSign  = m.priceChangePercent >= 0 ? '+' : '';
+    const momentumCls = m.momentumPercent   >= 0 ? 'pos' : 'neg';
+    const momentumSign = m.momentumPercent  >= 0 ? '+' : '';
+    const trend       = (m.trend || 'sideways').toLowerCase();
+
+    card.innerHTML = `
+      <div class="metric-card-header">
+        <span class="metric-card-ticker">${symbol}</span>
+        <span class="badge badge-${trend}">${capitalize(trend)}</span>
+      </div>
+      <div class="metric-rows">
+        <div class="metric-row">
+          <span class="metric-label">Current Price</span>
+          <span class="metric-value">$${fmt(m.currentPrice)}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">30-Day Change</span>
+          <span class="metric-value ${changeCls}">${changeSign}${fmt(m.priceChangePercent)}%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Volatility</span>
+          <span class="metric-value">${fmt(m.volatilityPercent)}%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Momentum (5d)</span>
+          <span class="metric-value ${momentumCls}">${momentumSign}${fmt(m.momentumPercent)}%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">SMA 5</span>
+          <span class="metric-value">$${fmt(m.sma5)}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">SMA 20</span>
+          <span class="metric-value">$${fmt(m.sma20)}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Avg Volume</span>
+          <span class="metric-value">${fmtVol(m.avgVolume)}</span>
+        </div>
+      </div>
+      ${m.period ? `<div class="metric-period">Data period: ${m.period} (${m.dataPoints} trading days)</div>` : ''}
+    `;
+    return card;
+  }
+
+  /* ─── Formatting helpers ──────────────────────────── */
+  function fmt(n) {
+    if (n === null || n === undefined) return '—';
+    return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function fmtVol(n) {
+    if (n === null || n === undefined) return '—';
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return String(n);
+  }
+
+  function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+</script>
+</body>
+</html>
