@@ -7,14 +7,14 @@ An AI-powered financial advisor that provides personalised stock analysis and in
 - **Personalised advice** — tailored to your risk tolerance, investment horizon, goals, and experience level
 - **Real market data** — 30-day OHLCV history fetched from [Polygon.io](https://polygon.io/)
 - **Technical analysis** — automatically computes trend, volatility, momentum, and simple moving averages (SMA5, SMA20)
-- **AI-driven insights** — powered by [xAI Grok](https://x.ai/) via the OpenAI-compatible SDK
+- **AI-driven insights** — powered by [Google Gemini](https://aistudio.google.com/) via the OpenAI-compatible SDK
 - **Structured JSON responses** — includes AI advice, profile echo, per-stock metrics, and a timestamp
 
 ## Requirements
 
 - Node.js ≥ 18
 - [Polygon.io](https://polygon.io/) API key (free tier is sufficient)
-- [xAI](https://console.x.ai/) API key
+- [Google AI Studio](https://aistudio.google.com/) API key
 
 ## Setup
 
@@ -24,7 +24,7 @@ npm install
 
 # 2. Copy the example env file and fill in your API keys
 cp .env.example .env
-# Edit .env and set POLYGON_API_KEY and XAI_API_KEY
+# Edit .env and set POLYGON_API_KEY and GEMINI_API_KEY
 
 # 3. Start the server
 npm start
@@ -41,8 +41,8 @@ npm run dev
 | Variable         | Required | Default  | Description                           |
 |-----------------|----------|----------|---------------------------------------|
 | `POLYGON_API_KEY` | ✅ Yes  |          | Polygon.io REST API key               |
-| `XAI_API_KEY`    | ✅ Yes   |          | xAI API key                           |
-| `XAI_MODEL`      | No       | `grok-3` | xAI model to use                      |
+| `GEMINI_API_KEY`  | ✅ Yes  |          | Google AI Studio API key              |
+| `GEMINI_MODEL`    | No       | `gemini-2.5-flash` | Gemini model to use          |
 | `PORT`           | No       | `3000`   | HTTP port the server listens on       |
 
 ## API
@@ -143,5 +143,5 @@ npm test
 
 - [Express](https://expressjs.com/) — HTTP server
 - [@polygon.io/client-js](https://github.com/polygon-io/client-js) — Market data
-- [openai](https://github.com/openai/openai-node) — xAI Grok via OpenAI-compatible SDK
+- [openai](https://github.com/openai/openai-node) — Google Gemini via OpenAI-compatible SDK
 - [Jest](https://jestjs.io/) — Unit testing
