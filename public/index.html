@@ -9,64 +9,175 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --border:    #30363d;
-      --accent:    #58a6ff;
-      --accent-2:  #3fb950;
-      --warn:      #f78166;
-      --text:      #e6edf3;
-      --muted:     #8b949e;
-      --radius:    10px;
-      --shadow:    0 4px 24px rgba(0,0,0,.45);
+      --bg:           #080c14;
+      --bg-mid:       #0d1117;
+      --surface:      rgba(22, 27, 34, 0.85);
+      --surface-solid:#161b22;
+      --border:       #21262d;
+      --border-glow:  rgba(88, 166, 255, 0.25);
+      --accent:       #58a6ff;
+      --accent-2:     #3fb950;
+      --accent-3:     #bc8cff;
+      --warn:         #f78166;
+      --text:         #e6edf3;
+      --muted:        #8b949e;
+      --radius:       12px;
+      --radius-sm:    8px;
+      --shadow:       0 8px 32px rgba(0, 0, 0, 0.55);
+      --shadow-glow:  0 0 24px rgba(88, 166, 255, 0.12);
+      --transition:   0.2s ease;
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       font-size: 15px;
       line-height: 1.6;
       min-height: 100vh;
-      padding: 0 1rem 3rem;
+      padding: 0 1rem 4rem;
+      overflow-x: hidden;
+    }
+
+    /* ── Ambient background gradient ─────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(88, 166, 255, 0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(63, 185, 80, 0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 30% at 60% 50%, rgba(188, 140, 255, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
     }
 
     /* ── Layout ───────────────────────────────────────── */
     .page-wrap {
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
     /* ── Header ───────────────────────────────────────── */
     header {
-      padding: 2.5rem 0 1.5rem;
+      padding: 2.8rem 0 1.8rem;
       border-bottom: 1px solid var(--border);
       margin-bottom: 2rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.1rem;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 160px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent), transparent);
     }
     .logo {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, #58a6ff 0%, #3fb950 100%);
-      border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #388bfd 0%, #2ea043 100%);
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 24px;
       flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(88, 166, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4);
+      animation: logoPulse 4s ease-in-out infinite;
     }
-    header h1 {
-      font-size: 1.55rem;
+    @keyframes logoPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(88, 166, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4); }
+      50%       { box-shadow: 0 0 32px rgba(88, 166, 255, 0.5), 0 4px 16px rgba(0, 0, 0, 0.4); }
+    }
+    .header-text h1 {
+      font-size: 1.65rem;
       font-weight: 700;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    header p {
+    .header-text p {
       color: var(--muted);
       font-size: 0.88rem;
-      margin-top: 2px;
+      margin-top: 3px;
     }
+    .header-badge {
+      margin-left: auto;
+      background: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.25);
+      border-radius: 20px;
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.25rem 0.7rem;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Step indicator ───────────────────────────────── */
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .step-indicator::-webkit-scrollbar { display: none; }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--surface-solid);
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .step-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .step-connector {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      min-width: 24px;
+      max-width: 60px;
+      margin: 0 0.5rem;
+    }
+    .step.active .step-num {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(88, 166, 255, 0.4);
+    }
+    .step.active .step-label { color: var(--accent); }
+    .step.done .step-num { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
+    .step.done .step-label { color: var(--accent-2); }
 
     /* ── Cards ────────────────────────────────────────── */
     .card {
@@ -74,103 +185,191 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1.5rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
       box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .card:hover { border-color: rgba(88, 166, 255, 0.2); }
+    .card:focus-within {
+      border-color: var(--border-glow);
+      box-shadow: var(--shadow), var(--shadow-glow);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
     }
     .card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 1rem;
+    }
+    .card-count {
+      background: rgba(88, 166, 255, 0.15);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      border-radius: 20px;
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.55rem;
+      min-width: 1.6rem;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .card-count.zero {
+      background: rgba(139, 148, 158, 0.1);
+      border-color: rgba(139, 148, 158, 0.2);
+      color: var(--muted);
     }
 
     /* ── Form elements ────────────────────────────────── */
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     label {
-      display: block;
-      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      font-weight: 500;
       color: var(--muted);
-      margin-bottom: 0.35rem;
     }
 
     input[type="text"],
     input[type="number"],
     select {
       width: 100%;
-      background: var(--bg);
+      background: rgba(13, 17, 23, 0.8);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       color: var(--text);
-      font-size: 0.93rem;
-      padding: 0.55rem 0.75rem;
+      font-size: 0.92rem;
+      padding: 0.6rem 0.85rem;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
       appearance: none;
+      -webkit-appearance: none;
     }
     input[type="text"]:focus,
     input[type="number"]:focus,
     select:focus {
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.12);
+      background: rgba(13, 17, 23, 0.95);
     }
+    input[type="text"]::placeholder,
+    input[type="number"]::placeholder { color: rgba(139, 148, 158, 0.6); }
+    input[type="number"] { -moz-appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--muted);
+      pointer-events: none;
+      transition: border-top-color var(--transition);
+    }
+    .select-wrap:focus-within::after { border-top-color: var(--accent); }
+    .select-wrap select { padding-right: 2.2rem; cursor: pointer; }
+    select option { background: var(--surface-solid); color: var(--text); }
 
     /* ── Stock ticker row ─────────────────────────────── */
     .ticker-row {
       display: flex;
       gap: 0.5rem;
     }
-    .ticker-row input { flex: 1; text-transform: uppercase; }
+    .ticker-row input { flex: 1; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 
     .btn-add {
-      background: var(--accent);
-      border: none;
-      border-radius: 6px;
-      color: #fff;
+      background: rgba(88, 166, 255, 0.12);
+      border: 1px solid rgba(88, 166, 255, 0.35);
+      border-radius: var(--radius-sm);
+      color: var(--accent);
       cursor: pointer;
-      font-size: 0.93rem;
-      font-weight: 600;
-      padding: 0 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 0 1.15rem;
       white-space: nowrap;
-      transition: opacity 0.15s;
+      transition: background var(--transition), border-color var(--transition), transform 0.1s;
+      letter-spacing: 0.02em;
     }
-    .btn-add:hover { opacity: 0.85; }
+    .btn-add:hover {
+      background: rgba(88, 166, 255, 0.22);
+      border-color: rgba(88, 166, 255, 0.55);
+      transform: translateY(-1px);
+    }
+    .btn-add:active { transform: translateY(0); }
 
     /* ── Chips ────────────────────────────────────────── */
     .chips {
       display: flex;
       flex-wrap: wrap;
       gap: 0.45rem;
-      margin-top: 0.75rem;
+      margin-top: 0.85rem;
       min-height: 2rem;
     }
     .chip {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      background: rgba(88,166,255,.12);
-      border: 1px solid rgba(88,166,255,.35);
+      background: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.3);
       border-radius: 20px;
       color: var(--accent);
-      font-size: 0.82rem;
-      font-weight: 600;
-      padding: 0.2rem 0.65rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.22rem 0.6rem 0.22rem 0.75rem;
+      animation: chipIn 0.18s ease;
+    }
+    @keyframes chipIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
     }
     .chip button {
       background: none;
       border: none;
       color: var(--accent);
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       line-height: 1;
       padding: 0;
-      opacity: 0.7;
+      opacity: 0.6;
+      transition: opacity var(--transition);
+      display: flex;
+      align-items: center;
     }
     .chip button:hover { opacity: 1; }
 
     .chip-hint {
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       align-self: center;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .chip-hint::before {
+      content: '';
+      display: inline-block;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--muted);
+      opacity: 0.5;
     }
 
     /* ── Profile grid ─────────────────────────────────── */
@@ -179,11 +378,12 @@
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
     }
-    @media (max-width: 540px) {
+    @media (max-width: 580px) {
       .profile-grid { grid-template-columns: 1fr; }
     }
 
     /* ── Analyze button ───────────────────────────────── */
+    .btn-analyze-wrap { margin-bottom: 1rem; }
     .btn-analyze {
       width: 100%;
       background: linear-gradient(135deg, #388bfd 0%, #2ea043 100%);
@@ -191,143 +391,280 @@
       border-radius: var(--radius);
       color: #fff;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      padding: 0.85rem 1.5rem;
-      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.03em;
+      padding: 0.9rem 1.5rem;
+      transition: opacity var(--transition), transform 0.12s, box-shadow var(--transition);
       position: relative;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
-    .btn-analyze:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-    .btn-analyze:active:not(:disabled) { transform: translateY(0); }
-    .btn-analyze:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-analyze::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn-analyze:hover:not(:disabled) {
+      opacity: 0.93;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(56, 139, 253, 0.35);
+    }
+    .btn-analyze:active:not(:disabled) { transform: translateY(0); box-shadow: none; }
+    .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── Spinner ──────────────────────────────────────── */
     .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid rgba(255,255,255,.35);
+      width: 17px;
+      height: 17px;
+      border: 2px solid rgba(255,255,255,.3);
       border-top-color: #fff;
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 0.45rem;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Progress bar ─────────────────────────────────── */
+    .progress-bar {
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.6rem;
+      display: none;
+    }
+    .progress-bar.visible { display: block; }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 2px;
+      animation: progressAnim 1.6s ease-in-out infinite;
+    }
+    @keyframes progressAnim {
+      0%   { width: 0%;  margin-left: 0%; }
+      50%  { width: 60%; margin-left: 20%; }
+      100% { width: 0%;  margin-left: 100%; }
+    }
+
     /* ── Error banner ─────────────────────────────────── */
     .error-banner {
-      background: rgba(247,129,102,.12);
-      border: 1px solid rgba(247,129,102,.4);
+      background: rgba(247, 129, 102, 0.08);
+      border: 1px solid rgba(247, 129, 102, 0.35);
       border-radius: var(--radius);
       color: var(--warn);
       display: none;
-      font-size: 0.9rem;
-      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
       padding: 0.85rem 1rem;
+      align-items: flex-start;
+      gap: 0.5rem;
     }
-    .error-banner.visible { display: block; }
+    .error-banner.visible { display: flex; animation: slideDown 0.2s ease; }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
     /* ── Results ──────────────────────────────────────── */
     #results { display: none; }
-    #results.visible { display: block; }
+    #results.visible { display: block; animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .results-title { font-size: 0.95rem; font-weight: 700; }
 
     .timestamp {
       color: var(--muted);
-      font-size: 0.8rem;
-      margin-bottom: 1.25rem;
-      text-align: right;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
     /* AI advice box */
     .advice-box {
-      background: rgba(63,185,80,.07);
-      border: 1px solid rgba(63,185,80,.3);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.4rem;
-      margin-bottom: 1.25rem;
-      white-space: pre-wrap;
-      line-height: 1.7;
-      font-size: 0.94rem;
+      background: rgba(63, 185, 80, 0.05);
+      border: 1px solid rgba(63, 185, 80, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 1.3rem 1.5rem;
+      margin-bottom: 1.1rem;
+      line-height: 1.75;
+      font-size: 0.93rem;
+    }
+    .advice-box h2, .advice-box h3, .advice-box h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-2);
+      margin: 1.1rem 0 0.45rem;
+    }
+    .advice-box h2:first-child,
+    .advice-box h3:first-child,
+    .advice-box h4:first-child { margin-top: 0; }
+    .advice-box p { margin-bottom: 0.6rem; }
+    .advice-box p:last-child { margin-bottom: 0; }
+    .advice-box ul, .advice-box ol { padding-left: 1.4rem; margin-bottom: 0.6rem; }
+    .advice-box li { margin-bottom: 0.25rem; }
+    .advice-box strong { color: var(--text); font-weight: 700; }
+    .advice-box em { color: var(--muted); font-style: italic; }
+    .advice-box hr { border: none; border-top: 1px solid var(--border); margin: 0.9rem 0; }
+    .advice-box code {
+      background: rgba(88, 166, 255, 0.1);
+      border-radius: 4px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.85em;
+      padding: 0.1em 0.4em;
+      color: var(--accent);
     }
 
     /* Stock metric cards */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.75rem;
     }
+    @media (max-width: 420px) { .metrics-grid { grid-template-columns: 1fr; } }
 
     .metric-card {
-      background: var(--surface);
+      background: rgba(13, 17, 23, 0.7);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.1rem 1.3rem;
+      padding: 1.1rem 1.2rem;
+      transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+    }
+    .metric-card:hover {
+      border-color: rgba(88, 166, 255, 0.25);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      transform: translateY(-2px);
     }
     .metric-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.85rem;
     }
     .metric-card-ticker {
       font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
+      font-weight: 800;
+      letter-spacing: 0.06em;
     }
     .badge {
       border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      padding: 0.18rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      padding: 0.2rem 0.6rem;
       text-transform: uppercase;
     }
-    .badge-bullish  { background: rgba(63,185,80,.18);  color: #3fb950; border: 1px solid rgba(63,185,80,.4); }
-    .badge-bearish  { background: rgba(247,129,102,.18); color: #f78166; border: 1px solid rgba(247,129,102,.4); }
-    .badge-sideways { background: rgba(139,148,158,.18); color: #8b949e; border: 1px solid rgba(139,148,158,.4); }
+    .badge-bullish  { background: rgba(63,185,80,.15);   color: #3fb950; border: 1px solid rgba(63,185,80,.35); }
+    .badge-bearish  { background: rgba(247,129,102,.15); color: #f78166; border: 1px solid rgba(247,129,102,.35); }
+    .badge-sideways { background: rgba(139,148,158,.15); color: #8b949e; border: 1px solid rgba(139,148,158,.35); }
 
-    .metric-rows { display: flex; flex-direction: column; gap: 0.45rem; }
-    .metric-row  { display: flex; justify-content: space-between; font-size: 0.84rem; }
+    .metric-rows { display: flex; flex-direction: column; gap: 0.4rem; }
+    .metric-row  {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.84rem;
+      padding: 0.2rem 0;
+    }
+    .metric-row + .metric-row { border-top: 1px solid rgba(255,255,255,0.04); }
     .metric-label { color: var(--muted); }
     .metric-value { font-weight: 600; }
-    .pos { color: #3fb950; }
-    .neg { color: #f78166; }
+    .pos { color: #3fb950 !important; }
+    .neg { color: #f78166 !important; }
+
+    /* Price change mini-bar */
+    .price-change-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      margin: 0.55rem 0 0.6rem;
+      overflow: hidden;
+    }
+    .price-change-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.6s ease;
+      max-width: 100%;
+    }
+    .price-change-fill.pos { background: linear-gradient(90deg, #2ea043, #3fb950); }
+    .price-change-fill.neg { background: linear-gradient(90deg, #c93c24, #f78166); }
 
     .metric-period {
-      border-top: 1px solid var(--border);
+      border-top: 1px solid rgba(255,255,255,0.06);
       color: var(--muted);
-      font-size: 0.75rem;
-      margin-top: 0.75rem;
-      padding-top: 0.6rem;
+      font-size: 0.74rem;
+      margin-top: 0.7rem;
+      padding-top: 0.55rem;
     }
 
     .no-data {
       color: var(--muted);
       font-style: italic;
       font-size: 0.88rem;
-      padding: 0.5rem 0;
+      padding: 0.4rem 0;
     }
 
     /* Profile summary pills */
     .profile-summary {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.45rem;
-      margin-top: 0.75rem;
+      gap: 0.4rem;
+      margin-top: 1rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
     }
     .profile-pill {
-      background: rgba(88,166,255,.1);
-      border: 1px solid rgba(88,166,255,.25);
+      background: rgba(88, 166, 255, 0.08);
+      border: 1px solid rgba(88, 166, 255, 0.2);
       border-radius: 20px;
       color: var(--muted);
-      font-size: 0.78rem;
-      padding: 0.15rem 0.65rem;
+      font-size: 0.76rem;
+      padding: 0.18rem 0.6rem;
     }
-    .profile-pill span { color: var(--text); font-weight: 600; }
+    .profile-pill span { color: var(--text); font-weight: 700; }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 640px) {
+      body { padding: 0 0.75rem 3rem; font-size: 14px; }
+      header { padding: 1.8rem 0 1.2rem; }
+      .header-text h1 { font-size: 1.35rem; }
+      .header-badge { display: none; }
+      .card { padding: 1.15rem; }
+      .step-indicator { margin-bottom: 1.2rem; }
+      .step-label { display: none; }
+      .step-connector { min-width: 12px; }
+      .advice-box { padding: 1rem 1.1rem; }
+    }
+    @media (max-width: 380px) {
+      .logo { width: 40px; height: 40px; font-size: 20px; }
+      .header-text h1 { font-size: 1.2rem; }
+    }
+
+    /* ── Custom scrollbar ─────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* ── Focus visible ────────────────────────────────── */
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -335,16 +672,46 @@
 
   <!-- ── Header ─────────────────────────────────────── -->
   <header>
-    <div class="logo">📈</div>
-    <div>
+    <div class="logo" aria-hidden="true">📈</div>
+    <div class="header-text">
       <h1>Finance Agent</h1>
-      <p>AI-powered stock analysis &amp; personalized investment advice</p>
+      <p>AI-powered stock analysis &amp; personalised investment advice</p>
     </div>
+    <span class="header-badge" aria-hidden="true">AI&nbsp;Powered</span>
   </header>
+
+  <!-- ── Step indicator ─────────────────────────────── -->
+  <nav class="step-indicator" aria-label="Progress steps">
+    <div class="step active" id="step1">
+      <div class="step-num" aria-hidden="true">1</div>
+      <div class="step-label">Add Stocks</div>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="step" id="step2">
+      <div class="step-num" aria-hidden="true">2</div>
+      <div class="step-label">Your Profile</div>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="step" id="step3">
+      <div class="step-num" aria-hidden="true">3</div>
+      <div class="step-label">Analyze</div>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="step" id="step4">
+      <div class="step-num" aria-hidden="true">4</div>
+      <div class="step-label">Results</div>
+    </div>
+  </nav>
 
   <!-- ── Stock Tickers ───────────────────────────────── -->
   <div class="card">
-    <div class="card-title">Stock Tickers</div>
+    <div class="card-header">
+      <div class="card-title">
+        <span aria-hidden="true">🔍</span>
+        Stock Tickers
+      </div>
+      <div class="card-count zero" id="tickerCount" aria-live="polite" aria-atomic="true">0 / 10</div>
+    </div>
     <div class="ticker-row">
       <input
         id="tickerInput"
@@ -353,64 +720,79 @@
         maxlength="5"
         autocomplete="off"
         spellcheck="false"
+        aria-label="Stock ticker symbol"
       />
-      <button class="btn-add" id="addTickerBtn">Add</button>
+      <button class="btn-add" id="addTickerBtn">+ Add</button>
     </div>
-    <div class="chips" id="chips">
+    <div class="chips" id="chips" role="list" aria-label="Added tickers">
       <span class="chip-hint" id="chipsHint">No stocks added yet — add up to 10 tickers above.</span>
     </div>
   </div>
 
   <!-- ── Investment Profile ──────────────────────────── -->
   <div class="card">
-    <div class="card-title">Investment Profile</div>
+    <div class="card-header">
+      <div class="card-title">
+        <span aria-hidden="true">👤</span>
+        Investment Profile
+      </div>
+    </div>
     <div class="profile-grid">
 
-      <div>
-        <label for="riskTolerance">Risk Tolerance</label>
-        <select id="riskTolerance">
-          <option value="low">Low — Capital preservation</option>
-          <option value="medium" selected>Medium — Balanced</option>
-          <option value="high">High — Aggressive growth</option>
-        </select>
+      <div class="form-group">
+        <label for="riskTolerance">⚡ Risk Tolerance</label>
+        <div class="select-wrap">
+          <select id="riskTolerance">
+            <option value="low">Low — Capital preservation</option>
+            <option value="medium" selected>Medium — Balanced</option>
+            <option value="high">High — Aggressive growth</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label for="investmentHorizon">Investment Horizon</label>
-        <select id="investmentHorizon">
-          <option value="short">Short-term (&lt; 1 year)</option>
-          <option value="medium" selected>Medium-term (1–5 years)</option>
-          <option value="long">Long-term (5+ years)</option>
-        </select>
+      <div class="form-group">
+        <label for="investmentHorizon">📅 Investment Horizon</label>
+        <div class="select-wrap">
+          <select id="investmentHorizon">
+            <option value="short">Short-term (&lt; 1 year)</option>
+            <option value="medium" selected>Medium-term (1–5 years)</option>
+            <option value="long">Long-term (5+ years)</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label for="goals">Investment Goals</label>
-        <select id="goals">
-          <option value="growth" selected>Growth</option>
-          <option value="income">Income</option>
-          <option value="preservation">Capital Preservation</option>
-          <option value="balanced">Balanced</option>
-        </select>
+      <div class="form-group">
+        <label for="goals">🎯 Investment Goals</label>
+        <div class="select-wrap">
+          <select id="goals">
+            <option value="growth" selected>Growth</option>
+            <option value="income">Income</option>
+            <option value="preservation">Capital Preservation</option>
+            <option value="balanced">Balanced</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label for="experience">Experience Level</label>
-        <select id="experience">
-          <option value="beginner">Beginner</option>
-          <option value="intermediate" selected>Intermediate</option>
-          <option value="expert">Expert</option>
-        </select>
+      <div class="form-group">
+        <label for="experience">🎓 Experience Level</label>
+        <div class="select-wrap">
+          <select id="experience">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate" selected>Intermediate</option>
+            <option value="expert">Expert</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label for="investmentAmount">Available Capital (USD, optional)</label>
+      <div class="form-group">
+        <label for="investmentAmount">💵 Available Capital (USD, optional)</label>
         <input
           id="investmentAmount"
           type="number"
           placeholder="e.g. 10000"
           min="1"
           step="1"
+          aria-label="Available capital in USD"
         />
       </div>
 
@@ -418,24 +800,45 @@
   </div>
 
   <!-- ── Analyze button ─────────────────────────────── -->
-  <button class="btn-analyze" id="analyzeBtn">Analyze Stocks</button>
+  <div class="btn-analyze-wrap">
+    <button class="btn-analyze" id="analyzeBtn">
+      <span id="analyzeBtnIcon" aria-hidden="true">✨</span>
+      <span id="analyzeBtnText">Analyze Stocks</span>
+    </button>
+    <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Analysis in progress">
+      <div class="progress-bar-fill"></div>
+    </div>
+  </div>
 
   <!-- ── Error banner ───────────────────────────────── -->
-  <div class="error-banner" id="errorBanner"></div>
+  <div class="error-banner" id="errorBanner" role="alert" aria-live="assertive"></div>
 
   <!-- ── Results ────────────────────────────────────── -->
-  <div id="results">
+  <div id="results" aria-live="polite">
 
-    <div class="timestamp" id="analysisTime"></div>
+    <div class="results-header">
+      <div class="results-title">Analysis Results</div>
+      <div class="timestamp" id="analysisTime"></div>
+    </div>
 
     <div class="card">
-      <div class="card-title">AI Investment Advice</div>
+      <div class="card-header">
+        <div class="card-title">
+          <span aria-hidden="true">🤖</span>
+          AI Investment Advice
+        </div>
+      </div>
       <div class="advice-box" id="adviceText"></div>
       <div class="profile-summary" id="profileSummary"></div>
     </div>
 
     <div class="card">
-      <div class="card-title">Stock Metrics</div>
+      <div class="card-header">
+        <div class="card-title">
+          <span aria-hidden="true">📊</span>
+          Stock Metrics
+        </div>
+      </div>
       <div class="metrics-grid" id="metricsGrid"></div>
     </div>
 
@@ -447,25 +850,54 @@
   /* ─── State ───────────────────────────────────────── */
   const tickers = new Set();
 
+  /* ─── HTML escape helper (for use in innerHTML) ──── */
+  function he(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /* ─── DOM refs ────────────────────────────────────── */
-  const tickerInput  = document.getElementById('tickerInput');
-  const addTickerBtn = document.getElementById('addTickerBtn');
-  const chipsEl      = document.getElementById('chips');
-  const chipsHint    = document.getElementById('chipsHint');
-  const analyzeBtn   = document.getElementById('analyzeBtn');
-  const errorBanner  = document.getElementById('errorBanner');
-  const resultsEl    = document.getElementById('results');
-  const adviceText   = document.getElementById('adviceText');
-  const metricsGrid  = document.getElementById('metricsGrid');
+  const tickerInput    = document.getElementById('tickerInput');
+  const addTickerBtn   = document.getElementById('addTickerBtn');
+  const chipsEl        = document.getElementById('chips');
+  const chipsHint      = document.getElementById('chipsHint');
+  const tickerCount    = document.getElementById('tickerCount');
+  const analyzeBtn     = document.getElementById('analyzeBtn');
+  const analyzeBtnIcon = document.getElementById('analyzeBtnIcon');
+  const analyzeBtnText = document.getElementById('analyzeBtnText');
+  const progressBar    = document.getElementById('progressBar');
+  const errorBanner    = document.getElementById('errorBanner');
+  const resultsEl      = document.getElementById('results');
+  const adviceText     = document.getElementById('adviceText');
+  const metricsGrid    = document.getElementById('metricsGrid');
   const profileSummary = document.getElementById('profileSummary');
-  const analysisTime = document.getElementById('analysisTime');
+  const analysisTime   = document.getElementById('analysisTime');
+
+  /* ─── Step management ─────────────────────────────── */
+  const steps = [
+    document.getElementById('step1'),
+    document.getElementById('step2'),
+    document.getElementById('step3'),
+    document.getElementById('step4'),
+  ];
+
+  function setStep(active) {
+    steps.forEach((s, i) => {
+      s.classList.remove('active', 'done');
+      if (i < active - 1)        s.classList.add('done');
+      else if (i === active - 1) s.classList.add('active');
+    });
+  }
 
   /* ─── Ticker management ───────────────────────────── */
   function addTicker() {
     const raw = tickerInput.value.trim().toUpperCase();
     if (!raw) return;
 
-    // Basic validation: 1-5 uppercase letters
     if (!/^[A-Z]{1,5}$/.test(raw)) {
       showError('Ticker symbols should be 1–5 letters (e.g. AAPL, TSLA).');
       return;
@@ -492,15 +924,26 @@
 
   function renderChips() {
     chipsEl.innerHTML = '';
-    if (tickers.size === 0) {
+    const count = tickers.size;
+
+    tickerCount.textContent = `${count} / 10`;
+    tickerCount.classList.toggle('zero', count === 0);
+    setStep(count > 0 ? 2 : 1);
+
+    if (count === 0) {
       chipsEl.appendChild(chipsHint);
       return;
     }
     tickers.forEach(sym => {
       const chip = document.createElement('span');
       chip.className = 'chip';
-      chip.innerHTML = `${sym} <button aria-label="Remove ${sym}" data-sym="${sym}">✕</button>`;
-      chip.querySelector('button').addEventListener('click', () => removeTicker(sym));
+      chip.setAttribute('role', 'listitem');
+      chip.appendChild(document.createTextNode(sym + ' '));
+      const btn = document.createElement('button');
+      btn.setAttribute('aria-label', 'Remove ' + sym);
+      btn.textContent = '\u00D7';
+      btn.addEventListener('click', () => removeTicker(sym));
+      chip.appendChild(btn);
       chipsEl.appendChild(chip);
     });
   }
@@ -533,9 +976,63 @@
   /* ─── Loading state ───────────────────────────────── */
   function setLoading(loading) {
     analyzeBtn.disabled = loading;
-    analyzeBtn.innerHTML = loading
-      ? '<span class="spinner"></span>Analyzing…'
-      : 'Analyze Stocks';
+    progressBar.classList.toggle('visible', loading);
+    if (loading) {
+      analyzeBtnIcon.innerHTML = '<span class="spinner"></span>';
+      analyzeBtnText.textContent = 'Analyzing\u2026';
+      setStep(3);
+    } else {
+      analyzeBtnIcon.textContent = '\u2728';
+      analyzeBtnText.textContent = 'Analyze Stocks';
+    }
+  }
+
+  /* ─── Minimal markdown renderer ──────────────────────
+     Renders a safe subset of markdown without any external
+     dependencies. HTML is escaped before processing.      */
+  function renderMarkdown(text) {
+    if (!text) return '';
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function inline(s) {
+      s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+      s = s.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+      s = s.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+      s = s.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+      s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+      return s;
+    }
+    const lines = text.split('\n');
+    const out = [];
+    let inList = false, listTag = '';
+    const flushList = () => { if (inList) { out.push(`</${listTag}>`); inList = false; listTag = ''; } };
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      let m;
+      if (/^#### /.test(line))      { flushList(); out.push(`<h4>${inline(esc(line.slice(5)))}</h4>`); continue; }
+      if (/^### /.test(line))       { flushList(); out.push(`<h3>${inline(esc(line.slice(4)))}</h3>`); continue; }
+      if (/^## /.test(line))        { flushList(); out.push(`<h2>${inline(esc(line.slice(3)))}</h2>`); continue; }
+      if (/^# /.test(line))         { flushList(); out.push(`<h2>${inline(esc(line.slice(2)))}</h2>`); continue; }
+      if (/^---+$/.test(line.trim())) { flushList(); out.push('<hr>'); continue; }
+      m = line.match(/^[\*\-\+] (.+)/);
+      if (m) {
+        if (!inList || listTag !== 'ul') { flushList(); out.push('<ul>'); inList = true; listTag = 'ul'; }
+        out.push(`<li>${inline(esc(m[1]))}</li>`);
+        continue;
+      }
+      m = line.match(/^\d+\. (.+)/);
+      if (m) {
+        if (!inList || listTag !== 'ol') { flushList(); out.push('<ol>'); inList = true; listTag = 'ol'; }
+        out.push(`<li>${inline(esc(m[1]))}</li>`);
+        continue;
+      }
+      flushList();
+      if (line.trim() === '') { out.push('<br>'); continue; }
+      out.push(`<p>${inline(esc(line))}</p>`);
+    }
+    flushList();
+    return out.join('');
   }
 
   /* ─── Analyze ─────────────────────────────────────── */
@@ -558,10 +1055,10 @@
     const payload = {
       stocks: Array.from(tickers),
       profile: {
-        riskTolerance:      document.getElementById('riskTolerance').value,
-        investmentHorizon:  document.getElementById('investmentHorizon').value,
-        goals:              document.getElementById('goals').value,
-        experience:         document.getElementById('experience').value,
+        riskTolerance:     document.getElementById('riskTolerance').value,
+        investmentHorizon: document.getElementById('investmentHorizon').value,
+        goals:             document.getElementById('goals').value,
+        experience:        document.getElementById('experience').value,
         ...(amount !== undefined && { investmentAmount: amount }),
       },
     };
@@ -593,13 +1090,9 @@
 
   /* ─── Render results ──────────────────────────────── */
   function renderResults(data) {
-    // Timestamp
-    analysisTime.textContent = `Analysis completed: ${new Date(data.analyzedAt).toLocaleString()}`;
+    analysisTime.textContent = new Date(data.analyzedAt).toLocaleString();
+    adviceText.innerHTML = renderMarkdown(data.advice || '');
 
-    // AI advice
-    adviceText.textContent = data.advice;
-
-    // Profile summary pills
     const p = data.profile;
     const pills = [
       ['Risk', p.riskTolerance],
@@ -607,13 +1100,14 @@
       ['Goals', p.goals],
       ['Experience', p.experience],
     ];
-    if (p.investmentAmount !== undefined) pills.push(['Capital', `$${p.investmentAmount.toLocaleString()}`]);
+    if (p.investmentAmount !== undefined) {
+      pills.push(['Capital', `$${Number(p.investmentAmount).toLocaleString()}`]);
+    }
 
     profileSummary.innerHTML = pills
-      .map(([k, v]) => `<span class="profile-pill">${k}: <span>${capitalize(v)}</span></span>`)
+      .map(([k, v]) => `<span class="profile-pill">${he(k)}: <span>${he(capitalize(v))}</span></span>`)
       .join('');
 
-    // Stock metrics cards
     metricsGrid.innerHTML = '';
     const summary = data.stockSummary || {};
     const symbols = Object.keys(summary);
@@ -621,12 +1115,11 @@
     if (symbols.length === 0) {
       metricsGrid.innerHTML = '<p class="no-data">No stock data available.</p>';
     } else {
-      symbols.forEach(sym => {
-        metricsGrid.appendChild(buildMetricCard(sym, summary[sym]));
-      });
+      symbols.forEach(sym => metricsGrid.appendChild(buildMetricCard(sym, summary[sym])));
     }
 
     resultsEl.classList.add('visible');
+    setStep(4);
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -637,22 +1130,30 @@
     if (!m) {
       card.innerHTML = `
         <div class="metric-card-header">
-          <span class="metric-card-ticker">${symbol}</span>
+          <span class="metric-card-ticker">${he(symbol)}</span>
         </div>
         <p class="no-data">No market data available for this ticker.</p>`;
       return card;
     }
 
-    const changeCls   = m.priceChangePercent >= 0 ? 'pos' : 'neg';
-    const changeSign  = m.priceChangePercent >= 0 ? '+' : '';
-    const momentumCls = m.momentumPercent   >= 0 ? 'pos' : 'neg';
-    const momentumSign = m.momentumPercent  >= 0 ? '+' : '';
-    const trend       = (m.trend || 'sideways').toLowerCase();
+    const isPos        = m.priceChangePercent >= 0;
+    const changeCls    = isPos ? 'pos' : 'neg';
+    const changeSign   = isPos ? '+' : '';
+    const momentumCls  = m.momentumPercent >= 0 ? 'pos' : 'neg';
+    const momentumSign = m.momentumPercent >= 0 ? '+' : '';
+    const trend        = (m.trend || 'sideways').toLowerCase();
+    const barWidth     = Math.min(Math.abs(m.priceChangePercent) * 5, 100).toFixed(1);
+
+    // Only 'bullish', 'bearish', 'sideways' are valid badge variants; restrict CSS class injection.
+    const safeTrend    = /^(bullish|bearish|sideways)$/.test(trend) ? trend : 'sideways';
 
     card.innerHTML = `
       <div class="metric-card-header">
-        <span class="metric-card-ticker">${symbol}</span>
-        <span class="badge badge-${trend}">${capitalize(trend)}</span>
+        <span class="metric-card-ticker">${he(symbol)}</span>
+        <span class="badge badge-${safeTrend}">${he(capitalize(safeTrend))}</span>
+      </div>
+      <div class="price-change-bar" title="30-Day Price Change">
+        <div class="price-change-fill ${changeCls}" style="width:${barWidth}%"></div>
       </div>
       <div class="metric-rows">
         <div class="metric-row">
@@ -684,19 +1185,19 @@
           <span class="metric-value">${fmtVol(m.avgVolume)}</span>
         </div>
       </div>
-      ${m.period ? `<div class="metric-period">Data period: ${m.period} (${m.dataPoints} trading days)</div>` : ''}
+      ${m.period ? `<div class="metric-period">\uD83D\uDCC5 ${he(String(m.period))} &nbsp;&middot;&nbsp; ${he(String(m.dataPoints))} trading days</div>` : ''}
     `;
     return card;
   }
 
   /* ─── Formatting helpers ──────────────────────────── */
   function fmt(n) {
-    if (n === null || n === undefined) return '—';
+    if (n === null || n === undefined) return '\u2014';
     return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function fmtVol(n) {
-    if (n === null || n === undefined) return '—';
+    if (n === null || n === undefined) return '\u2014';
     if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
     if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
     if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
