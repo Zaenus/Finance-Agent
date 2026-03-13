@@ -850,6 +850,16 @@
   /* ─── State ───────────────────────────────────────── */
   const tickers = new Set();
 
+  /* ─── HTML escape helper (for use in innerHTML) ──── */
+  function he(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /* ─── DOM refs ────────────────────────────────────── */
   const tickerInput    = document.getElementById('tickerInput');
   const addTickerBtn   = document.getElementById('addTickerBtn');
@@ -928,8 +938,12 @@
       const chip = document.createElement('span');
       chip.className = 'chip';
       chip.setAttribute('role', 'listitem');
-      chip.innerHTML = `${sym} <button aria-label="Remove ${sym}" data-sym="${sym}">\u00D7</button>`;
-      chip.querySelector('button').addEventListener('click', () => removeTicker(sym));
+      chip.appendChild(document.createTextNode(sym + ' '));
+      const btn = document.createElement('button');
+      btn.setAttribute('aria-label', 'Remove ' + sym);
+      btn.textContent = '\u00D7';
+      btn.addEventListener('click', () => removeTicker(sym));
+      chip.appendChild(btn);
       chipsEl.appendChild(chip);
     });
   }
@@ -1091,7 +1105,7 @@
     }
 
     profileSummary.innerHTML = pills
-      .map(([k, v]) => `<span class="profile-pill">${k}: <span>${capitalize(v)}</span></span>`)
+      .map(([k, v]) => `<span class="profile-pill">${he(k)}: <span>${he(capitalize(v))}</span></span>`)
       .join('');
 
     metricsGrid.innerHTML = '';
@@ -1116,7 +1130,7 @@
     if (!m) {
       card.innerHTML = `
         <div class="metric-card-header">
-          <span class="metric-card-ticker">${symbol}</span>
+          <span class="metric-card-ticker">${he(symbol)}</span>
         </div>
         <p class="no-data">No market data available for this ticker.</p>`;
       return card;
@@ -1130,10 +1144,13 @@
     const trend        = (m.trend || 'sideways').toLowerCase();
     const barWidth     = Math.min(Math.abs(m.priceChangePercent) * 5, 100).toFixed(1);
 
+    // Only 'bullish', 'bearish', 'sideways' are valid badge variants; restrict CSS class injection.
+    const safeTrend    = /^(bullish|bearish|sideways)$/.test(trend) ? trend : 'sideways';
+
     card.innerHTML = `
       <div class="metric-card-header">
-        <span class="metric-card-ticker">${symbol}</span>
-        <span class="badge badge-${trend}">${capitalize(trend)}</span>
+        <span class="metric-card-ticker">${he(symbol)}</span>
+        <span class="badge badge-${safeTrend}">${he(capitalize(safeTrend))}</span>
       </div>
       <div class="price-change-bar" title="30-Day Price Change">
         <div class="price-change-fill ${changeCls}" style="width:${barWidth}%"></div>
@@ -1168,7 +1185,7 @@
           <span class="metric-value">${fmtVol(m.avgVolume)}</span>
         </div>
       </div>
-      ${m.period ? `<div class="metric-period">📅 ${m.period} &nbsp;&middot;&nbsp; ${m.dataPoints} trading days</div>` : ''}
+      ${m.period ? `<div class="metric-period">\uD83D\uDCC5 ${he(String(m.period))} &nbsp;&middot;&nbsp; ${he(String(m.dataPoints))} trading days</div>` : ''}
     `;
     return card;
   }
