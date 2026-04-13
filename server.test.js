@@ -63,6 +63,31 @@ describe('computeStockMetrics', () => {
     expect(metrics.sma20).toBeGreaterThan(0);
   });
 
+  it('computes meanPrice and stdDev', () => {
+    const metrics = computeStockMetrics(bars);
+    // mean of closes: (102+107+106+104+103+105+111+114+112+117)/10 = 1081/10 = 108.1
+    expect(metrics.meanPrice).toBeCloseTo(108.1, 1);
+    expect(metrics.stdDev).toBeGreaterThan(0);
+  });
+
+  it('sets suggestedBuyPrice below meanPrice and suggestedSellPrice above meanPrice', () => {
+    const metrics = computeStockMetrics(bars);
+    expect(metrics.suggestedBuyPrice).toBeLessThan(metrics.meanPrice);
+    expect(metrics.suggestedSellPrice).toBeGreaterThan(metrics.meanPrice);
+  });
+
+  it('sets suggestedBuyPrice = meanPrice - stdDev and suggestedSellPrice = meanPrice + stdDev', () => {
+    const metrics = computeStockMetrics(bars);
+    expect(metrics.suggestedBuyPrice).toBeCloseTo(metrics.meanPrice - metrics.stdDev, 1);
+    expect(metrics.suggestedSellPrice).toBeCloseTo(metrics.meanPrice + metrics.stdDev, 1);
+  });
+
+  it('computes Bollinger Bands around SMA20', () => {
+    const metrics = computeStockMetrics(bars);
+    expect(metrics.bollingerUpper).toBeGreaterThan(metrics.sma20);
+    expect(metrics.bollingerLower).toBeLessThan(metrics.sma20);
+  });
+
   it('returns correct dataPoints count', () => {
     const metrics = computeStockMetrics(bars);
     expect(metrics.dataPoints).toBe(bars.length);
@@ -113,6 +138,12 @@ describe('buildUserPrompt', () => {
       avgVolume: 80000000,
       sma5: 148.5,
       sma20: 145.0,
+      meanPrice: 146.0,
+      stdDev: 3.5,
+      suggestedBuyPrice: 142.5,
+      suggestedSellPrice: 149.5,
+      bollingerUpper: 152.0,
+      bollingerLower: 138.0,
       period: '2024-01-01 to 2024-01-31',
     },
     TSLA: null,
@@ -147,5 +178,15 @@ describe('buildUserPrompt', () => {
   it('requests buy/hold/sell recommendations', () => {
     const prompt = buildUserPrompt(metrics, profile);
     expect(prompt).toContain('buy / hold / sell');
+  });
+
+  it('includes statistical buy/sell zones and Bollinger Bands in the prompt', () => {
+    const prompt = buildUserPrompt(metrics, profile);
+    expect(prompt).toContain('Statistical Buy Zone');
+    expect(prompt).toContain('Statistical Sell Zone');
+    expect(prompt).toContain('Bollinger Upper Band');
+    expect(prompt).toContain('Bollinger Lower Band');
+    expect(prompt).toContain('Mean Close Price');
+    expect(prompt).toContain('Price Std Dev');
   });
 });

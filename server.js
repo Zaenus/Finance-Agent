@@ -41,6 +41,7 @@ app.get('/health', (_req, res) => {
 // POST /analyze
 // Body: {
 //   "stocks": ["AAPL", "TSLA"],
+//   "dataWindow": "month",            // week | month | year (default: month)
 //   "profile": {
 //     "riskTolerance": "medium",       // low | medium | high
 //     "investmentHorizon": "long",     // short | medium | long
@@ -49,8 +50,12 @@ app.get('/health', (_req, res) => {
 //     "investmentAmount": 10000        // optional, in USD
 //   }
 // }
+
+const DATA_WINDOW_DAYS = { week: 7, month: 30, year: 365 };
+const VALID_DATA_WINDOWS = Object.keys(DATA_WINDOW_DAYS);
+
 app.post('/analyze', async (req, res) => {
-  const { stocks, profile = {} } = req.body;
+  const { stocks, profile = {}, dataWindow = 'month' } = req.body;
 
   if (!stocks || !Array.isArray(stocks) || stocks.length === 0) {
     return res.status(400).json({ error: 'Provide a non-empty array of stock symbols in "stocks".' });
@@ -58,6 +63,12 @@ app.post('/analyze', async (req, res) => {
 
   if (stocks.length > 10) {
     return res.status(400).json({ error: 'A maximum of 10 stock symbols are allowed per request.' });
+  }
+
+  if (!VALID_DATA_WINDOWS.includes(dataWindow)) {
+    return res
+      .status(400)
+      .json({ error: `Invalid dataWindow. Allowed values: ${VALID_DATA_WINDOWS.join(', ')}.` });
   }
 
   if (profile.riskTolerance && !VALID_RISK_TOLERANCES.includes(profile.riskTolerance)) {
@@ -88,13 +99,13 @@ app.post('/analyze', async (req, res) => {
   }
 
   const today = getDateString(0);
-  const oneMonthAgo = getDateString(30);
+  const windowStart = getDateString(DATA_WINDOW_DAYS[dataWindow]);
   const stockMetrics = {};
 
   try {
     for (const symbol of stocks) {
       const upperSymbol = symbol.toUpperCase().trim();
-      const aggs = await polygon.stocks.aggregates(upperSymbol, 1, 'day', oneMonthAgo, today);
+      const aggs = await polygon.stocks.aggregates(upperSymbol, 1, 'day', windowStart, today);
 
       stockMetrics[upperSymbol] =
         aggs.results && aggs.results.length > 0 ? computeStockMetrics(aggs.results) : null;
@@ -122,6 +133,7 @@ app.post('/analyze', async (req, res) => {
         experience: profile.experience || 'intermediate',
         ...(profile.investmentAmount !== undefined && { investmentAmount: profile.investmentAmount }),
       },
+      dataWindow,
       stockSummary: stockMetrics,
       analyzedAt: new Date().toISOString(),
     });
