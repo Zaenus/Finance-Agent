@@ -51,6 +51,22 @@ function computeStockMetrics(bars) {
   const sma20Bars = closes.slice(-20);
   const sma20 = sma20Bars.reduce((s, v) => s + v, 0) / sma20Bars.length;
 
+  // Standard deviation of closing prices over the full period
+  const meanPrice = closes.reduce((s, v) => s + v, 0) / closes.length;
+  const priceVariance = closes.reduce((s, v) => s + Math.pow(v - meanPrice, 2), 0) / closes.length;
+  const stdDev = Math.sqrt(priceVariance);
+
+  // Statistical buy/sell zones: mean ± 1 standard deviation
+  const suggestedBuyPrice = meanPrice - stdDev;
+  const suggestedSellPrice = meanPrice + stdDev;
+
+  // Bollinger Bands: SMA20 ± 2 standard deviations of the closes used for SMA20
+  const sma20Variance =
+    sma20Bars.reduce((s, v) => s + Math.pow(v - sma20, 2), 0) / sma20Bars.length;
+  const sma20StdDev = Math.sqrt(sma20Variance);
+  const bollingerUpper = sma20 + 2 * sma20StdDev;
+  const bollingerLower = sma20 - 2 * sma20StdDev;
+
   const trend =
     priceChangePercent > 2 ? 'bullish' : priceChangePercent < -2 ? 'bearish' : 'sideways';
 
@@ -63,6 +79,12 @@ function computeStockMetrics(bars) {
     avgVolume: Math.round(avgVolume),
     sma5: parseFloat(sma5.toFixed(2)),
     sma20: parseFloat(sma20.toFixed(2)),
+    meanPrice: parseFloat(meanPrice.toFixed(2)),
+    stdDev: parseFloat(stdDev.toFixed(2)),
+    suggestedBuyPrice: parseFloat(suggestedBuyPrice.toFixed(2)),
+    suggestedSellPrice: parseFloat(suggestedSellPrice.toFixed(2)),
+    bollingerUpper: parseFloat(bollingerUpper.toFixed(2)),
+    bollingerLower: parseFloat(bollingerLower.toFixed(2)),
     dataPoints: bars.length,
     period: `${new Date(bars[0].t).toISOString().split('T')[0]} to ${new Date(bars[bars.length - 1].t).toISOString().split('T')[0]}`,
   };
@@ -132,6 +154,12 @@ function buildUserPrompt(stockMetrics, profile) {
       prompt += `- Average Daily Volume: ${metrics.avgVolume.toLocaleString()}\n`;
       prompt += `- 5-Day SMA: $${metrics.sma5}\n`;
       prompt += `- 20-Day SMA: $${metrics.sma20}\n`;
+      prompt += `- Mean Close Price: $${metrics.meanPrice}\n`;
+      prompt += `- Price Std Dev: $${metrics.stdDev}\n`;
+      prompt += `- Statistical Buy Zone (mean − 1σ): $${metrics.suggestedBuyPrice}\n`;
+      prompt += `- Statistical Sell Zone (mean + 1σ): $${metrics.suggestedSellPrice}\n`;
+      prompt += `- Bollinger Upper Band (SMA20 + 2σ): $${metrics.bollingerUpper}\n`;
+      prompt += `- Bollinger Lower Band (SMA20 − 2σ): $${metrics.bollingerLower}\n`;
       prompt += `- Analysis Period: ${metrics.period}\n\n`;
     } else {
       prompt += `- No market data available for this symbol.\n\n`;
@@ -144,7 +172,7 @@ function buildUserPrompt(stockMetrics, profile) {
 
   prompt += `Based on these metrics and my investment profile (${risk} risk tolerance, ${horizon}-term horizon, ${goals} goals), please provide:
 1. A buy / hold / sell recommendation for each stock with reasoning.
-2. Key risks and opportunities for each stock.
+2. Key risks and opportunities for each stock, referencing the statistical buy/sell zones and Bollinger Bands where relevant.
 3. Suggested portfolio allocation across the analysed stocks.
 4. Overall market context relevant to my profile.`;
 
